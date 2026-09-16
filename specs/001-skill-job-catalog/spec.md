@@ -1,12 +1,14 @@
-# Feature Specification: Skill and Job Catalog
+# Feature Specification: Skill Catalog
 
 **Feature Branch**: `001-skill-job-catalog`
 
 **Created**: 2026-09-10
 
+**Updated**: 2026-09-16
+
 **Status**: Draft
 
-**Input**: User description: "MVP for Developer Knowledge Manager: a personal skill catalog with user-set priority and knowledge, notes, jobs that reference existing skills, navigation from a job requirement to that skill, and persistence across browser sessions without accounts or a backend."
+**Input**: User description: "MVP for Developer Knowledge Manager: a personal skill catalog with user-set priority and knowledge, notes, navigation to skill detail, and persistence across browser sessions without accounts or a backend. Jobs are out of this MVP."
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -40,7 +42,7 @@ A developer with an existing catalog scans skills grouped or ordered by priority
 
 **Acceptance Scenarios**:
 
-1. **Given** the user has one or more skills, **When** they view My Skills, **Then** they see the heading "My Skills", a "Create Skill" action, a "Create Job" action, and the skill names.
+1. **Given** the user has one or more skills, **When** they view My Skills, **Then** they see the heading "My Skills", a "Create Skill" action, and the skill names.
 2. **Given** skills with different priority levels, **When** they view My Skills, **Then** skills are grouped or ordered so higher priority appears before lower priority.
 3. **Given** a listed skill, **When** they choose that skill, **Then** they see Skill Detail for that skill.
 4. **Given** Skill Detail is loading the skill, **When** the record is not yet available, **Then** they see "Loading...".
@@ -53,99 +55,60 @@ A developer with an existing catalog scans skills grouped or ordered by priority
 
 ### User Story 3 - Keep the catalog after leaving (Priority: P2)
 
-A developer closes the product and returns later on the same device and browser. Skills and jobs they already created are still there. They do not sign in.
+A developer closes the product and returns later on the same device and browser. Skills they already created are still there. They do not sign in.
 
 **Why this priority**: A catalog that disappears after a refresh cannot be used as a personal knowledge manager.
 
-**Independent Test**: Create at least one skill and one job, fully leave the product, reopen it, and confirm both records are still listed with the same details.
+**Independent Test**: Create at least one skill, fully leave the product, reopen it, and confirm the record is still listed with the same details.
 
 **Acceptance Scenarios**:
 
-1. **Given** the user created skills and jobs, **When** they leave and return in the same browser on the same device, **Then** those skills and jobs are still present with the same fields.
+1. **Given** the user created skills, **When** they leave and return in the same browser on the same device, **Then** those skills are still present with the same fields.
 2. **Given** a returning user, **When** they open the product, **Then** they are not asked to create an account or sign in.
 
 ---
 
-### User Story 4 - Record a job and its required skills (Priority: P3)
+### User Story 4 - Remove a skill (Priority: P4)
 
-A developer records a job opportunity by name and attaches skills that already exist in their catalog. The product does not invent a new skill while they create the job. They can start this from My Skills or from Jobs.
+A developer deletes a skill they no longer want. The skill is removed from the catalog and can no longer be opened.
 
-**Why this priority**: Connecting jobs to the catalog is the second half of the product, but it depends on skills existing first.
+**Why this priority**: Cleanup is useful but secondary to creating and reviewing the catalog.
 
-**Independent Test**: Create two skills, open Jobs, create a job named "Frontend Engineer" selecting those skills, and confirm the job lists those skill names.
-
-**Acceptance Scenarios**:
-
-1. **Given** the user has no jobs, **When** they view Jobs, **Then** they see the Jobs heading, a way to create a job, a way to go to My Skills, and no job cards.
-2. **Given** the user is on My Skills, **When** they choose "Create Job", **Then** they can reach the Jobs page and open the create-job overlay.
-3. **Given** the user is on Jobs, **When** they choose "Create Job", **Then** a create-job overlay opens with Job Name, a control to select existing skills, Cancel, and Create. The form is not permanently visible on the page.
-4. **Given** the create-job overlay is open, **When** they submit with an empty name, **Then** the job is not created.
-5. **Given** the user has existing skills, **When** they create a job, **Then** they can select only those existing skills; the product does not create a skill as a side effect.
-6. **Given** the user has no skills, **When** they open the create-job overlay, **Then** they cannot invent a skill there and are able to cancel and go to My Skills instead.
-7. **Given** a job was created with selected skills, **When** they view Jobs, **Then** they see the job name and the names of the associated skills (resolved from the skill catalog, not a separate copy of skill details).
-8. **Given** the user is on Jobs, **When** they choose "My Skills", **Then** they arrive at My Skills.
-9. **Given** jobs exist, **When** they view Jobs, **Then** they see the list on this page; there is no separate job detail page.
-
----
-
-### User Story 5 - Open a required skill from a job (Priority: P3)
-
-While reviewing a job, a developer chooses a listed skill and lands on that skill's existing detail page so they can see priority, knowledge, and notes in one place.
-
-**Why this priority**: This is the payoff of associating jobs with the catalog, and it reuses Skill Detail instead of a new job-centric skill view.
-
-**Independent Test**: Open a job that lists "Web Vitals" and choose that name; confirm Skill Detail shows the same skill as opening it from My Skills.
+**Independent Test**: Create a skill and delete it from Skill Detail; it disappears from My Skills and its detail URL shows not found.
 
 **Acceptance Scenarios**:
 
-1. **Given** a job lists associated skills, **When** the user chooses one of those skill names, **Then** they arrive at Skill Detail for that skill.
-2. **Given** the user opened a skill from a job, **When** they view the detail, **Then** they see the same skill information they would see if they had opened it from My Skills.
+1. **Given** a skill exists, **When** the user chooses delete on Skill Detail, **Then** the skill is removed and no longer appears in My Skills or Skill Detail.
+2. **Given** the user just deleted a skill, **When** they view My Skills, **Then** that skill is gone without requiring a manual reload as a user step.
 
 ---
 
-### User Story 6 - Remove a skill that no job uses (Priority: P4)
+### User Story 5 - Move around the product (Priority: P4)
 
-A developer deletes a skill they no longer want, but only if no job lists it. If jobs still reference it, deletion stays unavailable and they see why.
-
-**Why this priority**: Cleanup is useful but secondary to creating and navigating the catalog.
-
-**Independent Test**: Create an unused skill and delete it (it disappears). Create a skill, attach it to a job, and confirm delete is blocked with an explanation.
-
-**Acceptance Scenarios**:
-
-1. **Given** a skill is not associated with any job, **When** the user chooses delete, **Then** the skill is removed and no longer appears in My Skills or Skill Detail.
-2. **Given** a skill is associated with one or more jobs, **When** the user views delete, **Then** delete is disabled and they can see that the skill is used by jobs (for example, "Used by 3 jobs").
-3. **Given** a skill is associated with one or more jobs, **When** they still attempt to delete it, **Then** the skill remains and they see a clear explanation such as "This skill is used by one or more jobs and cannot be deleted."
-
----
-
-### User Story 7 - Move around the product (Priority: P4)
-
-A developer always has a global header with Logo, Home, My Skills, Jobs, and About. About is a short, minimal page.
+A developer always has a global header with Logo, Home, My Skills, and About. About is a short, minimal page. Logo sits on the start edge; Home, My Skills, and About sit on the end edge.
 
 **Why this priority**: Navigation makes the other stories usable; it is not valuable on its own.
 
-**Independent Test**: From any main page, use the header to reach Home, My Skills, Jobs, and About.
+**Independent Test**: From any main page, use the header to reach Home, My Skills, and About. Confirm Logo and Home both reach Home, with Logo visually separated from the nav items.
 
 **Acceptance Scenarios**:
 
-1. **Given** the user is on any main page, **When** they view the top of the page, **Then** they see Logo, Home, My Skills, Jobs, and About.
+1. **Given** the user is on any main page, **When** they view the top of the page, **Then** they see Logo on the start edge and Home, My Skills, and About on the end edge.
 2. **Given** the user chooses a header destination, **When** navigation completes, **Then** they are on the matching page.
-3. **Given** the user opens About, **When** the page loads, **Then** they see a brief description of the product (no extra sections required).
+3. **Given** the user chooses the Logo, **When** navigation completes, **Then** they are on Home.
+4. **Given** the user opens About, **When** the page loads, **Then** they see a brief description of the product (no extra sections required).
 
 ---
 
 ### Edge Cases
 
 - Creating a skill with only whitespace in the name is treated as a missing name; the skill is not created.
-- A skill may exist with no job associations; the catalog MUST allow that.
-- A job may be created with a name and no selected skills; it appears in the job list with an empty skill list.
 - Duplicate skill names are allowed; each skill remains a distinct record.
-- If a job still references a skill that cannot be found (for example after unexpected data loss), the job list still shows the job and does not invent skill details; the missing skill is not presented as a normal openable catalog item.
 - Priority and knowledge are independent: a skill may be Very High priority and Very Low knowledge, or the reverse.
 - The product MUST NOT change priority or knowledge unless the user sets them.
 - Closing the create overlay with Cancel discards the draft and creates nothing.
-- After a successful create, the new skill or job is visible without requiring the user to invent a workaround (for example, they should not need to manually refresh as a required step).
+- After a successful create, the new skill is visible without requiring the user to invent a workaround (for example, they should not need to manually refresh as a required step).
+- There is no Jobs page, job overlay, or skill–job association. A leftover `/jobs` URL is not a product destination.
 
 ## Requirements *(mandatory)*
 
@@ -161,26 +124,18 @@ A developer always has a global header with Logo, Home, My Skills, Jobs, and Abo
 - **FR-008**: The interface MUST show priority and knowledge as human-readable labels (or equivalent visuals) mapped from the five levels. Stored values MUST remain the numeric levels, independent of how they are shown.
 - **FR-009**: Skill creation MUST happen in an overlay (modal or drawer), not as a form that stays on the page at all times.
 - **FR-010**: Users MUST be able to update an existing skill's name, description, priority, knowledge, and notes from Skill Detail so "manage catalog" includes change after create.
-- **FR-011**: Users MUST be able to delete a skill that is not associated with any job.
-- **FR-012**: Users MUST NOT be able to delete a skill that is associated with one or more jobs. The product MUST disable that action and explain that the skill is in use.
-- **FR-013**: Users MUST be able to create a job with a required name and an optional selection of existing skills.
-- **FR-014**: Job creation MUST happen in an overlay (modal or drawer) and MUST NOT create a new skill as a side effect.
-- **FR-015**: A job MUST reference existing skills only. Skill information shown on a job MUST come from the skill catalog, not from a copy stored on the job.
-- **FR-016**: Users MUST be able to list all jobs on a single Jobs page, each showing its name and associated skill names. The MVP MUST NOT include a separate job detail page.
-- **FR-017**: Each skill name shown on a job MUST be actionable and MUST open the same Skill Detail used from My Skills.
-- **FR-018**: Users MUST be able to reach My Skills from Home ("Create Skills") and from Jobs ("My Skills"), and MUST be able to start job creation from both My Skills and Jobs.
-- **FR-019**: The product MUST provide Home, My Skills, Skill Detail, Jobs, and About, plus a global header with Logo, Home, My Skills, Jobs, and About.
-- **FR-020**: Home MUST contain a hero with a short product description and a primary "Create Skills" action. No additional home sections are required.
-- **FR-021**: About MUST be a minimal page that briefly describes the product.
-- **FR-022**: Skill Detail MUST show a loading state ("Loading...") until the skill is available, then either the skill fields or "Skill not found".
-- **FR-023**: Skills and jobs MUST persist across sessions in the same browser on the same device without an account, sign-in, remote server, or shared database.
-- **FR-024**: A skill MUST be creatable and usable with zero job associations.
-- **FR-025**: The product MUST NOT require authentication or user accounts.
+- **FR-011**: Users MUST be able to delete a skill from Skill Detail. Delete MUST NOT be blocked by other records.
+- **FR-012**: Users MUST be able to reach My Skills from Home ("Create Skills").
+- **FR-013**: The product MUST provide Home, My Skills, Skill Detail, and About, plus a global header with Logo, Home, My Skills, and About. The product MUST NOT provide a Jobs page or job-creation action.
+- **FR-014**: Home MUST contain a hero with a short product description and a primary "Create Skills" action. No additional home sections are required.
+- **FR-015**: About MUST be a minimal page that briefly describes the product as a personal skill catalog. It MUST NOT describe job tracking or job–skill association as a current capability.
+- **FR-016**: Skill Detail MUST show a loading state ("Loading...") until the skill is available, then either the skill fields or "Skill not found".
+- **FR-017**: Skills MUST persist across sessions in the same browser on the same device without an account, sign-in, remote server, or shared database.
+- **FR-018**: The product MUST NOT require authentication or user accounts.
 
 ### Key Entities
 
-- **Skill**: A reusable technical skill in the user's personal catalog. Attributes: identity, name, description, priority (1–5), knowledge (1–5), notes. Independent of jobs; may exist with no associations.
-- **Job**: A job opportunity and its skill requirements. Attributes: identity, name, and references to existing skills. Does not own skill details.
+- **Skill**: A reusable technical skill in the user's personal catalog. Attributes: identity, name, description, priority (1–5), knowledge (1–5), notes.
 - **Priority**: User-assigned importance of a skill on a five-level scale.
 - **Knowledge**: User-assigned current competence for a skill on the same five-level scale, independent of priority.
 
@@ -188,6 +143,7 @@ A developer always has a global header with Logo, Home, My Skills, Jobs, and Abo
 
 The following MUST NOT be delivered in this MVP:
 
+- Job entity, job routes, associating skills with job postings, importing jobs, extracting skills from postings
 - Authentication, user accounts, remote backend, shared database, external services
 - Job extras: company, salary, URL, description, application status, application dates
 - Automatic prioritization, skill-frequency analytics, charts, dashboards
@@ -195,8 +151,6 @@ The following MUST NOT be delivered in this MVP:
 - Learning resources (articles, videos, documentation, courses), interview questions, spaced repetition, study sessions
 - Skill categories
 - A status field separate from knowledge level
-- A dedicated job detail page
-- Creating a skill automatically while creating a job
 - Multi-device sync (data is expected to stay in one browser)
 
 These may be specified later as separate features after this MVP is stable.
@@ -208,24 +162,22 @@ These may be specified later as separate features after this MVP is stable.
 - **SC-001**: A first-time user can go from Home to a visible first skill in under 2 minutes using only a name.
 - **SC-002**: After a skill is created, it appears in My Skills without a required manual reload as a user step, in under 5 seconds.
 - **SC-003**: In a catalog of at least 6 skills across 3 or more priority levels, a reviewer can confirm in one pass that higher-priority skills appear before lower-priority skills.
-- **SC-004**: In 100% of attempts, opening a skill from My Skills and opening the same skill from a job shows the same name, description, priority, knowledge, and notes.
-- **SC-005**: After creating at least 3 skills and 2 jobs, leaving the product and returning in the same browser restores all of those records with matching fields.
-- **SC-006**: 100% of attempted deletions of a skill used by one or more jobs leave the skill in place and show an in-use explanation.
-- **SC-007**: 100% of attempted deletions of a skill used by zero jobs remove that skill from the catalog.
-- **SC-008**: Users can complete create-skill, create-job, and open-skill-from-job flows without creating an account, in a single sitting.
-- **SC-009**: A new user who has never created a skill can complete the empty-state create path on the first attempt without using header navigation as a workaround.
+- **SC-004**: After creating at least 3 skills, leaving the product and returning in the same browser restores all of those records with matching fields.
+- **SC-005**: 100% of attempted deletions of an existing skill remove that skill from the catalog.
+- **SC-006**: Users can complete create-skill and open-skill flows without creating an account, in a single sitting.
+- **SC-007**: A new user who has never created a skill can complete the empty-state create path on the first attempt without using header navigation as a workaround.
+- **SC-008**: From every main page, Logo is visually separated from Home / My Skills / About, and both Logo and Home reach Home.
 
 ## Assumptions
 
 - The single actor is a software developer using the product alone in one browser. There are no roles, sharing, or permissions.
-- "Manage" a skill catalog includes viewing, creating, updating, and (when unused) deleting skills. Update happens from Skill Detail because the source MVP did not specify a separate edit page.
-- Jobs are create-and-list only. Changing a job's name or skill list after create, and deleting a job, are out of this MVP unless a later spec adds them.
-- A job may be saved with zero skills so name-only create stays consistent with skills. The user is expected to select skills at create time if they want associations, because job edit is out of scope.
+- "Manage" a skill catalog includes viewing, creating, updating, and deleting skills. Update and delete happen from Skill Detail because there is no separate edit page.
 - Duplicate skill names are allowed; identity is not the display name.
 - UI language for this MVP is English. Priority and knowledge use the English labels Very Low, Low, Medium, High, and Very High. Localized labels (for example Portuguese) may be added later without changing the 1–5 scale.
 - Persistence is local to one browser on one device, consistent with the project constitution. Users understand that clearing site data removes their catalog.
-- Home has only the hero block. Extra marketing sections and a home "Create Job" call-to-action are deferred.
+- Home has only the hero block.
 - About contains a short product summary only.
-- "Create Job" from My Skills takes the user to Jobs and the create-job overlay; it does not create a job in the background.
 - Visual treatment of levels (labels now; stars or other visuals later) may change; the five stored levels do not.
 - The product is used on a typical desktop or laptop browser for the MVP; a dedicated mobile design is not required, but pages MUST remain usable enough to complete the primary flows.
+- Jobs were modeled in an earlier revision of this feature and then removed: the primary use is opening a skill to review priority, knowledge, and notes. Manual job-by-job entry would not be used. Automatic job import is a later product, not part of this MVP. Role context, if needed, belongs in skill notes.
+- Folder name `001-skill-job-catalog` is historical; this specification is the skill catalog only.

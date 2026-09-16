@@ -1,18 +1,20 @@
 <!--
 Sync Impact Report
-- Version change: (unset template) → 1.0.0
+- Version change: 1.0.0 → 2.0.0
 - Modified principles:
-  - [PRINCIPLE_1_NAME] → I. MVP Scope Discipline
-  - [PRINCIPLE_2_NAME] → II. Skills Remain Independent
-  - [PRINCIPLE_3_NAME] → III. Jobs Associate Existing Skills Only
-  - [PRINCIPLE_4_NAME] → IV. User-Owned Priority and Knowledge
-  - [PRINCIPLE_5_NAME] → V. Simplicity Before Abstraction
-- Added sections:
-  - Technical Constraints
-  - Scope Boundaries
-  - Governance (ratified)
-- Removed sections: none (placeholders replaced)
-- Follow-up TODOs: none
+  - I. MVP Scope Discipline → I. MVP Scope Discipline (skill catalog only;
+    job requirements removed from included MVP)
+  - II. Skills Remain Independent → II. Skills Remain Independent (no longer
+    defined in terms of Job associations)
+  - III. Jobs Associate Existing Skills Only → III. Jobs Stay Out Until a
+    Later Spec (incompatible redefinition: Job is out of MVP)
+  - IV. User-Owned Priority and Knowledge → unchanged
+  - V. Simplicity Before Abstraction → unchanged (Job overlays/routes dropped
+    from implied surface)
+- Added sections: none
+- Removed sections: none
+- Follow-up TODOs: update feature spec 001, data-model, research, contracts,
+  plan, tasks, and remove Job from application code
 -->
 
 # Dev Skill Tree Constitution
@@ -22,51 +24,45 @@ Sync Impact Report
 ### I. MVP Scope Discipline
 
 Dev Skill Tree is a client-side web app that helps developers track,
-organize, and improve technical knowledge by connecting a personal skill
-catalog to job requirements.
+organize, and improve technical knowledge through a personal skill catalog.
 
 Every change MUST map to an Included MVP capability (skills catalog,
-priority, knowledge, notes, jobs, skill–job association, navigation, and
-`localStorage` persistence) or to an approved constitution amendment.
-Features listed under Scope Boundaries as out of MVP MUST NOT be
-implemented until this constitution is amended or a post-MVP specification
-is ratified.
+priority, knowledge, notes, navigation, and `localStorage` persistence)
+or to an approved constitution amendment. Features listed under Scope
+Boundaries as out of MVP MUST NOT be implemented until this constitution
+is amended or a post-MVP specification is ratified.
 
 Rationale: A small product that can be used immediately is the goal.
-Speculative features delay that outcome.
+Speculative features delay that outcome. Manual job entry was rejected
+because it would not be used; that does not expand this MVP.
 
 ### II. Skills Remain Independent
 
 A Skill is a reusable item in the user's personal catalog. A Skill MUST
-be creatable, listable, editable, and persistable with zero Job
-associations. A Skill MUST NOT embed Job-specific fields or depend on a
-Job existing.
+be creatable, listable, editable, deletable, and persistable without any
+other entity existing.
 
 The Skill record is the single source of truth for its own `id`, `name`,
-`description`, `priority`, `knowledge`, and `notes`. Other entities MUST
-reference a Skill by `id` rather than copy Skill fields.
+`description`, `priority`, `knowledge`, and `notes`. A Skill MUST NOT
+embed job-posting fields (company, salary, application status, or a list
+of jobs). Context about roles MAY live in `notes` as free text.
 
-Rationale: Users study skills for their own growth, not only because a
-job currently requires them.
+Rationale: Users study skills for their own growth. The catalog MUST
+work as a study tool on its own.
 
-### III. Jobs Associate Existing Skills Only
+### III. Jobs Stay Out Until a Later Spec
 
-A Job represents a job opportunity and its technical requirements. In the
-MVP a Job MUST consist of `id`, `name`, and a list of Skill `id`s.
+The MVP MUST NOT include a Job entity, a jobs collection, job routes,
+job creation UI, or skill–job association. Skill deletion MUST NOT be
+blocked by job references.
 
-Creating a Job MUST NOT create a Skill. The user MUST create a Skill
-before it can be associated with a Job. Jobs MUST store Skill identifiers
-only; they MUST NOT duplicate Skill payloads.
+Automatic import of job postings, extraction of skills from postings,
+and job-application tracking MUST NOT be added to justify bringing Jobs
+back. A later ratified specification MAY introduce Jobs. Until then,
+unused Job surface MUST NOT remain in the product.
 
-A Skill associated with one or more Jobs MUST NOT be deleted. The UI MUST
-disable deletion in that case and explain that the skill is in use. A
-Skill with zero Job associations MAY be deleted.
-
-The MVP MUST NOT include a Job detail page. Job lists MUST link each
-associated skill to the existing Skill Detail route.
-
-Rationale: Jobs exist to connect opportunities to the catalog, not to
-become a second copy of skill data.
+Rationale: Unused screens teach the wrong habit and hide the real MVP.
+Import is a different product, not a reason to keep a dead entity.
 
 ### IV. User-Owned Priority and Knowledge
 
@@ -110,14 +106,15 @@ cheaper to add when the MVP stays small and explicit.
 
 The MVP MUST run without a backend, database, authentication, user
 accounts, or external APIs. Persistence MUST use browser `localStorage`
-with two collections: `skills` (complete Skill objects) and `jobs`
-(Job objects that reference Skill `id`s).
+with one collection: `skills` (complete Skill objects). The MVP MUST NOT
+read or write a `jobs` collection.
 
 Persistence logic MUST live in a dedicated storage module (conceptually
 `lib/storage.ts`) that exposes operations such as `getSkills`,
-`getSkillById`, `createSkill`, `getJobs`, `getJobById`, and `createJob`.
+`getSkillById`, `createSkill`, `updateSkill`, and `deleteSkill`.
 `getSkillById` MAY be implemented by reading `getSkills` and finding by
-`id`. Callers MUST NOT need to know serialization details.
+`id`. Callers MUST NOT need to know serialization details. `deleteSkill`
+MUST remove the skill when it exists; it MUST NOT consult other entities.
 
 Skill Detail MUST load Skill data on the client because the source is
 `localStorage`. The route MAY remain a Server Component; the component
@@ -126,24 +123,27 @@ surface a not-found state; loading MUST surface an explicit loading
 state.
 
 The stack is Next.js App Router with React. Suggested routes for the MVP
-are `/`, `/skills`, `/skills/[id]`, `/jobs`, and `/about`. A global header
-MUST provide Logo, Home, My Skills, Jobs, and About. Skill and Job
-creation MUST use a modal or drawer rather than a permanently visible
-form. This layout is the intended starting structure, not a mandate to
-add extra directories or frameworks.
+are `/`, `/skills`, `/skills/[id]`, and `/about`. A global header MUST
+provide Logo, Home, My Skills, and About. Logo MUST sit on the start
+edge; the remaining items MUST sit on the end edge. Skill creation MUST
+use a modal or drawer rather than a permanently visible form. This
+layout is the intended starting structure, not a mandate to add extra
+directories or frameworks.
 
 ## Scope Boundaries
 
 Included in the MVP:
 
-- Create, list, and view skills; sort or group by priority (higher first)
+- Create, list, view, update, and delete skills; sort or group by
+  priority (higher first)
 - Store skill `name`, `description`, `priority`, `knowledge`, and `notes`
-- Create and list jobs; associate existing skills; show those skills
-- Navigate from a skill list and from a job's skill to Skill Detail
-- Persist data across browser sessions via `localStorage`
+- Navigate from the skill list to Skill Detail
+- Persist skills across browser sessions via `localStorage`
 
 Explicitly out of MVP (MUST NOT ship until a later ratified spec):
 
+- Job entity, job routes, job–skill association, job import, and
+  automatic skill extraction from postings
 - Authentication, accounts, backend, database, external APIs
 - Job metadata: company, salary, URL, description, application status,
   application dates
@@ -155,7 +155,8 @@ Explicitly out of MVP (MUST NOT ship until a later ratified spec):
 
 Planned later versions (Resources, Study, Career Opportunities, Knowledge
 Analytics, Advanced Features) MUST NOT shape MVP data models or UI beyond
-keeping Skill as the source of truth and Job as an ID association.
+keeping Skill as the source of truth. A future Job feature MUST be a
+separate specification.
 
 ## Governance
 
@@ -174,7 +175,7 @@ comment describing principle and section changes. Versioning:
 
 Compliance review: every specification, plan, and pull request MUST
 verify that proposed work stays inside Scope Boundaries, preserves Skill
-independence and Job simplicity, keeps priority and knowledge
+independence, keeps Jobs out of this MVP, keeps priority and knowledge
 user-controlled, and routes persistence through the storage module.
 Unjustified complexity MUST be rejected.
 
@@ -182,4 +183,4 @@ Runtime development guidance for this Next.js version lives in
 `AGENTS.md`. Feature work MUST proceed through Spec Kit (`specify` →
 `plan` → `tasks` → `implement`) rather than expanding the MVP informally.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-10 | **Last Amended**: 2026-09-10
+**Version**: 2.0.0 | **Ratified**: 2026-09-10 | **Last Amended**: 2026-09-16

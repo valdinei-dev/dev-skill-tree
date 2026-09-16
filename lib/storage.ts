@@ -2,11 +2,9 @@
 
 import { useSyncExternalStore } from "react";
 import { isSkillLevel } from "@/lib/levels";
-import type { Job } from "@/types/job";
 import type { Skill, SkillLevel } from "@/types/skill";
 
 const SKILLS_KEY = "skills";
-const JOBS_KEY = "jobs";
 
 export type CreateSkillInput = {
   name: string;
@@ -16,19 +14,12 @@ export type CreateSkillInput = {
   notes?: string;
 };
 
-export type CreateJobInput = {
-  name: string;
-  skills?: string[];
-};
-
 export type DeleteSkillResult =
   | { ok: true }
-  | { ok: false; reason: "in-use"; jobCount: number }
   | { ok: false; reason: "not-found" };
 
 const listeners = new Set<() => void>();
 let skillsCache: Skill[] | null = null;
-let jobsCache: Job[] | null = null;
 
 function canUseStorage(): boolean {
   return typeof window !== "undefined" && typeof localStorage !== "undefined";
@@ -60,20 +51,6 @@ function isSkill(value: unknown): value is Skill {
     isSkillLevel(record.priority) &&
     isSkillLevel(record.knowledge) &&
     typeof record.notes === "string"
-  );
-}
-
-function isJob(value: unknown): value is Job {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-
-  const record = value as Record<string, unknown>;
-  return (
-    typeof record.id === "string" &&
-    typeof record.name === "string" &&
-    Array.isArray(record.skills) &&
-    record.skills.every((id) => typeof id === "string")
   );
 }
 
@@ -125,12 +102,6 @@ function requireLevel(value: number | undefined, fallback: SkillLevel): SkillLev
 function persistSkills(next: Skill[]): void {
   skillsCache = next;
   writeCollection(SKILLS_KEY, next);
-  emit();
-}
-
-function persistJobs(next: Job[]): void {
-  jobsCache = next;
-  writeCollection(JOBS_KEY, next);
   emit();
 }
 
@@ -194,54 +165,16 @@ export function updateSkill(
   return next;
 }
 
-export function countJobsUsingSkill(id: string): number {
-  return getJobs().filter((job) => job.skills.includes(id)).length;
-}
-
 export function deleteSkill(id: string): DeleteSkillResult {
   const existing = getSkillById(id);
   if (!existing) {
     return { ok: false, reason: "not-found" };
   }
 
-  const jobCount = countJobsUsingSkill(id);
-  if (jobCount > 0) {
-    return { ok: false, reason: "in-use", jobCount };
-  }
-
   persistSkills(getSkills().filter((skill) => skill.id !== id));
   return { ok: true };
 }
 
-export function getJobs(): Job[] {
-  if (!canUseStorage()) {
-    return [];
-  }
-  if (!jobsCache) {
-    jobsCache = readCollection(JOBS_KEY, isJob);
-  }
-  return jobsCache;
-}
-
-export function getJobById(id: string): Job | null {
-  return getJobs().find((job) => job.id === id) ?? null;
-}
-
-export function createJob(input: CreateJobInput): Job {
-  const skillIds = new Set(getSkills().map((skill) => skill.id));
-  const job: Job = {
-    id: crypto.randomUUID(),
-    name: requireName(input.name),
-    skills: (input.skills ?? []).filter((id) => skillIds.has(id)),
-  };
-  persistJobs([...getJobs(), job]);
-  return job;
-}
-
 export function useSkills(): Skill[] | null {
   return useSyncExternalStore(subscribeStorage, getSkills, () => null);
-}
-
-export function useJobs(): Job[] | null {
-  return useSyncExternalStore(subscribeStorage, getJobs, () => null);
 }

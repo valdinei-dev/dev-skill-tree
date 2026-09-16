@@ -9,9 +9,10 @@ Internal persistence interface used by client components. Not an HTTP API. Compo
 | Key | Value |
 | --- | ----- |
 | `skills` | JSON array of Skill objects |
-| `jobs` | JSON array of Job objects |
 
-Missing or invalid JSON is treated as an empty array for that collection.
+Missing or invalid JSON is treated as an empty array.
+
+The module MUST NOT read or write a `jobs` key.
 
 ## Operations
 
@@ -36,33 +37,14 @@ MAY be implemented as `getSkills().find(...)`. Returns `null` when not found.
 - Trims `name` when present; rejects empty name.
 - Returns `null` if the skill does not exist.
 
-### `deleteSkill(id: string): { ok: true } | { ok: false; reason: "in-use"; jobCount: number } | { ok: false; reason: "not-found" }`
+### `deleteSkill(id: string): { ok: true } | { ok: false; reason: "not-found" }`
 
-- If any job’s `skills` includes `id`, return `{ ok: false, reason: "in-use", jobCount }`.
 - If the skill does not exist, return `{ ok: false, reason: "not-found" }`.
 - Otherwise remove it from `skills` and return `{ ok: true }`.
-
-### `getJobs(): Job[]`
-
-Returns all jobs in insertion order.
-
-### `getJobById(id: string): Job | null`
-
-Find by id. Unused by UI in this MVP; part of the constitution API.
-
-### `createJob(input: { name: string; skills?: string[] }): Job`
-
-- Trims `name`. Rejects empty name.
-- `skills` defaults to `[]`. Each entry MUST be an existing skill id; ignore or reject unknown ids (do not create skills). Prefer ignoring unknown ids so a stale picker cannot invent records.
-- Assigns `id` with `crypto.randomUUID()`.
-- Appends to `jobs` and returns the stored Job.
-
-### `countJobsUsingSkill(id: string): number`
-
-Count of jobs whose `skills` array includes `id`. Used to disable delete and show “Used by N jobs”.
+- MUST NOT consult other collections.
 
 ## Invariants
 
-1. Jobs never store skill name, description, priority, knowledge, or notes.
-2. Writes MUST NOT invent priority or knowledge; only persist user-supplied or default values.
-3. All functions that touch the DOM storage API MUST be called from the browser (client components after mount).
+1. Writes MUST NOT invent priority or knowledge; only persist user-supplied or default values.
+2. All functions that touch the DOM storage API MUST be called from the browser (client components after mount).
+3. There is no Job type, `createJob`, `getJobs`, or `countJobsUsingSkill` in this module.

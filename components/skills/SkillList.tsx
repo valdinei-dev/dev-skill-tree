@@ -36,21 +36,13 @@ export function SkillList() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-semibold tracking-tight">My Skills</h1>
         {skills.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setFormOpen(true)}
-              className="rounded-md bg-foreground px-4 py-2 text-sm text-background"
-            >
-              Create Skill
-            </button>
-            <Link
-              href="/jobs?create=1"
-              className="rounded-md border border-black/15 px-4 py-2 text-sm dark:border-white/20"
-            >
-              Create Job
-            </Link>
-          </div>
+          <button
+            type="button"
+            onClick={() => setFormOpen(true)}
+            className="rounded-md bg-foreground px-4 py-2 text-sm text-background"
+          >
+            Create Skill
+          </button>
         ) : null}
       </div>
 

@@ -9,8 +9,8 @@ export default function Home() {
         </h1>
         <p className="mt-4 text-lg leading-8 text-zinc-600 dark:text-zinc-400">
           Dev Skill Tree is a personal catalog for software developers. Record
-          what you know, how important each skill is, and which jobs require
-          them — then jump from a job requirement straight to that skill.
+          what you know, how important each skill is, and notes for later
+          study — all in your browser.
         </p>
       </div>
       <Link

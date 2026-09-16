@@ -1,9 +1,8 @@
 # Dev Skill Tree
 
 A personal knowledge manager for software developers. Track technical skills,
-set how important they are and how well you know them, and associate those
-skills with job opportunities. Data stays in your browser — there is no account
-or backend in this MVP.
+set how important they are and how well you know them, and keep notes for
+study. Data stays in your browser — there is no account or backend in this MVP.
 
 ## Getting Started
 
@@ -13,12 +12,11 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). Use **Create Skills** to
-start a catalog, then add jobs from **Jobs** using skills you already created.
+start a catalog.
 
 ## Routes
 
 - `/` Home
 - `/skills` My Skills
 - `/skills/[id]` Skill detail
-- `/jobs` Jobs
 - `/about` About

@@ -3,13 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type SubmitEvent } from "react";
 import { LEVELS, LEVEL_LABELS, labelForLevel } from "@/lib/levels";
-import {
-  countJobsUsingSkill,
-  deleteSkill,
-  updateSkill,
-  useJobs,
-  useSkills,
-} from "@/lib/storage";
+import { deleteSkill, updateSkill, useSkills } from "@/lib/storage";
 import type { SkillLevel } from "@/types/skill";
 
 type SkillDetailProps = {
@@ -19,8 +13,6 @@ type SkillDetailProps = {
 export function SkillDetail({ id }: SkillDetailProps) {
   const router = useRouter();
   const skills = useSkills();
-  const jobs = useJobs();
-  const [message, setMessage] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [deleted, setDeleted] = useState(false);
 
@@ -28,7 +20,7 @@ export function SkillDetail({ id }: SkillDetailProps) {
     return <p>Loading...</p>;
   }
 
-  if (skills === null || jobs === null) {
+  if (skills === null) {
     return <p>Loading...</p>;
   }
 
@@ -36,9 +28,6 @@ export function SkillDetail({ id }: SkillDetailProps) {
   if (!skill) {
     return <p>Skill not found</p>;
   }
-
-  const jobCount = countJobsUsingSkill(id);
-  const inUse = jobCount > 0;
 
   function handleSave(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -61,7 +50,6 @@ export function SkillDetail({ id }: SkillDetailProps) {
       return;
     }
     setSaved(true);
-    setMessage(null);
   }
 
   function handleDelete() {
@@ -69,12 +57,6 @@ export function SkillDetail({ id }: SkillDetailProps) {
     if (result.ok) {
       setDeleted(true);
       router.replace("/skills");
-      return;
-    }
-    if (result.reason === "in-use") {
-      setMessage(
-        "This skill is used by one or more jobs and cannot be deleted.",
-      );
     }
   }
 
@@ -163,23 +145,13 @@ export function SkillDetail({ id }: SkillDetailProps) {
       </form>
 
       <div className="flex flex-col items-start gap-2 border-t border-black/10 pt-6 dark:border-white/15">
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Used by {jobCount} {jobCount === 1 ? "job" : "jobs"}
-        </p>
         <button
           type="button"
-          disabled={inUse}
           onClick={handleDelete}
-          className="rounded-md border border-red-700/40 px-4 py-2 text-sm text-red-800 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-300"
+          className="rounded-md border border-red-700/40 px-4 py-2 text-sm text-red-800 dark:text-red-300"
         >
           Delete
         </button>
-        {inUse || message ? (
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            {message ??
-              "This skill is used by one or more jobs and cannot be deleted."}
-          </p>
-        ) : null}
       </div>
     </section>
   );

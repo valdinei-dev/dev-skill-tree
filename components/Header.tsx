@@ -3,14 +3,13 @@ import Link from "next/link";
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/skills", label: "My Skills" },
-  { href: "/jobs", label: "Jobs" },
   { href: "/about", label: "About" },
 ] as const;
 
 export function Header() {
   return (
     <header className="border-b border-black/10 bg-background dark:border-white/15">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-4 px-6 py-4">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-4">
         <Link
           href="/"
           className="text-base font-semibold tracking-tight text-foreground"

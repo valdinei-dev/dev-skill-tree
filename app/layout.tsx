@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Dev Skill Tree",
   description:
-    "Track, organize, and improve your technical skills, and connect them to job requirements.",
+    "Track, organize, and improve your technical skills in a personal catalog.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -17,7 +17,7 @@ export default function Home() {
         href="/skills"
         className="mt-10 inline-flex h-12 items-center justify-center rounded-full bg-foreground px-8 text-base font-medium text-background md:mt-0"
       >
-        Create Skills
+        My Skills
       </Link>
     </section>
   );

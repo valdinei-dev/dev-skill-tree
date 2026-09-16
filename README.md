@@ -11,8 +11,8 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Use **Create Skills** to
-start a catalog.
+Open [http://localhost:3000](http://localhost:3000). Use **My Skills** to
+open the catalog (create from there if it is empty).
 
 ## Routes
 

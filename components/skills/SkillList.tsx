@@ -3,22 +3,17 @@
 import Link from "next/link";
 import { useState } from "react";
 import { SkillForm } from "@/components/skills/SkillForm";
-import { LEVELS, labelForLevel } from "@/lib/levels";
+import { labelForLevel } from "@/lib/levels";
 import { useSkills } from "@/lib/storage";
-import type { Skill, SkillLevel } from "@/types/skill";
+import type { Skill } from "@/types/skill";
 
-function groupByPriority(skills: Skill[]): { level: SkillLevel; skills: Skill[] }[] {
-  return LEVELS.slice()
-    .reverse()
-    .map((level) => ({
-      level,
-      skills: skills
-        .filter((skill) => skill.priority === level)
-        .sort((a, b) =>
-          a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
-        ),
-    }))
-    .filter((group) => group.skills.length > 0);
+function sortSkillsForTable(skills: Skill[]): Skill[] {
+  return skills.slice().sort((a, b) => {
+    if (a.priority !== b.priority) {
+      return b.priority - a.priority;
+    }
+    return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+  });
 }
 
 export function SkillList() {
@@ -29,7 +24,7 @@ export function SkillList() {
     return <p className="text-zinc-600 dark:text-zinc-400">Loading...</p>;
   }
 
-  const groups = groupByPriority(skills);
+  const rows = sortSkillsForTable(skills);
 
   return (
     <section className="flex flex-col gap-8">
@@ -60,27 +55,44 @@ export function SkillList() {
           </button>
         </div>
       ) : (
-        <div className="flex flex-col gap-8">
-          {groups.map((group) => (
-            <section key={group.level} className="flex flex-col gap-3">
-              <h2 className="border-b border-black/10 pb-2 text-sm font-medium uppercase tracking-wide text-zinc-500 dark:border-white/15 dark:text-zinc-400">
-                {labelForLevel(group.level)}
-              </h2>
-              <ul className="flex flex-col gap-1">
-                {group.skills.map((skill) => (
-                  <li key={skill.id}>
-                    <Link
-                      href={`/skills/${skill.id}`}
-                      className="block rounded-md px-2 py-2 text-lg hover:bg-black/[.04] dark:hover:bg-white/10"
-                    >
-                      {skill.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
+        <table className="w-full border-collapse text-left">
+          <thead>
+            <tr className="border-b border-black/10 text-sm font-medium text-zinc-500 dark:border-white/15 dark:text-zinc-400">
+              <th scope="col" className="px-2 py-2 font-medium">
+                Skill
+              </th>
+              <th scope="col" className="px-2 py-2 font-medium">
+                Priority
+              </th>
+              <th scope="col" className="px-2 py-2 font-medium">
+                Knowledge
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((skill) => (
+              <tr
+                key={skill.id}
+                className="border-b border-black/5 dark:border-white/10"
+              >
+                <td className="px-2 py-2 text-lg">
+                  <Link
+                    href={`/skills/${skill.id}`}
+                    className="rounded-md hover:underline"
+                  >
+                    {skill.name}
+                  </Link>
+                </td>
+                <td className="px-2 py-2 text-zinc-700 dark:text-zinc-300">
+                  {labelForLevel(skill.priority)}
+                </td>
+                <td className="px-2 py-2 text-zinc-700 dark:text-zinc-300">
+                  {labelForLevel(skill.knowledge)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
 
       <SkillForm

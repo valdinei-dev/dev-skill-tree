@@ -14,6 +14,12 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000). Use **My Skills** to
 open the catalog (create from there if it is empty).
 
+Run persistence contract checks (no UI):
+
+```bash
+npm test
+```
+
 ## Routes
 
 - `/` Home

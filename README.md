@@ -18,6 +18,7 @@ Run persistence contract checks (no UI):
 
 ```bash
 npm test
+npm run typecheck
 ```
 
 ## Routes

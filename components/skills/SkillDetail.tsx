@@ -70,36 +70,38 @@ export function SkillDetail({ id }: SkillDetailProps) {
         </button>
       </div>
 
-      <dl className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <dt className="text-sm text-zinc-600 dark:text-zinc-400">
+          <h2 className="text-sm font-normal text-zinc-600 dark:text-zinc-400">
             Description
-          </dt>
-          <dd className="min-h-6 whitespace-pre-wrap text-base">
+          </h2>
+          <p className="min-h-6 whitespace-pre-wrap text-base">
             {skill.description}
-          </dd>
+          </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1">
-            <dt className="text-sm text-zinc-600 dark:text-zinc-400">
+            <h2 className="text-sm font-normal text-zinc-600 dark:text-zinc-400">
               Priority
-            </dt>
-            <dd className="text-base">{labelForLevel(skill.priority)}</dd>
+            </h2>
+            <p className="text-base">{labelForLevel(skill.priority)}</p>
           </div>
           <div className="flex flex-col gap-1">
-            <dt className="text-sm text-zinc-600 dark:text-zinc-400">
+            <h2 className="text-sm font-normal text-zinc-600 dark:text-zinc-400">
               Knowledge
-            </dt>
-            <dd className="text-base">{labelForLevel(skill.knowledge)}</dd>
+            </h2>
+            <p className="text-base">{labelForLevel(skill.knowledge)}</p>
           </div>
         </div>
         <div className="flex flex-col gap-1">
-          <dt className="text-sm text-zinc-600 dark:text-zinc-400">Notes</dt>
-          <dd className="min-h-6 whitespace-pre-wrap text-base">
+          <h2 className="text-sm font-normal text-zinc-600 dark:text-zinc-400">
+            Notes
+          </h2>
+          <p className="min-h-6 whitespace-pre-wrap text-base">
             {skill.notes}
-          </dd>
+          </p>
         </div>
-      </dl>
+      </div>
 
       <div className="flex flex-col items-start gap-2 border-t border-black/10 pt-6 dark:border-white/15">
         <button

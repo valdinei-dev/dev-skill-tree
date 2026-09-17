@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type SubmitEvent } from "react";
+import { useEffect, useRef, useState, type SubmitEvent } from "react";
 import { LEVELS, LEVEL_LABELS, labelForLevel } from "@/lib/levels";
 import { deleteSkill, updateSkill, useSkills } from "@/lib/storage";
 import type { SkillLevel } from "@/types/skill";
@@ -15,6 +15,21 @@ export function SkillDetail({ id }: SkillDetailProps) {
   const skills = useSkills();
   const [saved, setSaved] = useState(false);
   const [deleted, setDeleted] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      return;
+    }
+    if (confirmOpen && !dialog.open) {
+      dialog.showModal();
+    }
+    if (!confirmOpen && dialog.open) {
+      dialog.close();
+    }
+  }, [confirmOpen]);
 
   if (deleted) {
     return <p>Loading...</p>;
@@ -52,9 +67,14 @@ export function SkillDetail({ id }: SkillDetailProps) {
     setSaved(true);
   }
 
-  function handleDelete() {
+  function handleCloseConfirm() {
+    setConfirmOpen(false);
+  }
+
+  function handleConfirmDelete() {
     const result = deleteSkill(id);
     if (result.ok) {
+      setConfirmOpen(false);
       setDeleted(true);
       router.replace("/skills");
     }
@@ -147,12 +167,44 @@ export function SkillDetail({ id }: SkillDetailProps) {
       <div className="flex flex-col items-start gap-2 border-t border-black/10 pt-6 dark:border-white/15">
         <button
           type="button"
-          onClick={handleDelete}
+          onClick={() => setConfirmOpen(true)}
           className="rounded-md border border-red-700/40 px-4 py-2 text-sm text-red-800 dark:text-red-300"
         >
           Delete
         </button>
       </div>
+
+      <dialog
+        ref={dialogRef}
+        className="w-[min(100%,28rem)] rounded-xl border border-black/10 bg-background p-6 text-foreground shadow-lg dark:border-white/15"
+        onClose={handleCloseConfirm}
+        onCancel={(event) => {
+          event.preventDefault();
+          handleCloseConfirm();
+        }}
+      >
+        <h2 className="text-lg font-semibold">Delete Skill</h2>
+        <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+          You are about to delete the skill “{skill.name}”. This cannot be
+          undone.
+        </p>
+        <div className="mt-6 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={handleCloseConfirm}
+            className="rounded-md border border-black/15 px-4 py-2 text-sm dark:border-white/20"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirmDelete}
+            className="rounded-md border border-red-700/40 px-4 py-2 text-sm text-red-800 dark:text-red-300"
+          >
+            Delete
+          </button>
+        </div>
+      </dialog>
     </section>
   );
 }

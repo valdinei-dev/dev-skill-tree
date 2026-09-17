@@ -1,10 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type SubmitEvent } from "react";
-import { LEVELS, LEVEL_LABELS, labelForLevel } from "@/lib/levels";
-import { deleteSkill, updateSkill, useSkills } from "@/lib/storage";
-import type { SkillLevel } from "@/types/skill";
+import { useEffect, useRef, useState } from "react";
+import { SkillEditForm } from "@/components/skills/SkillEditForm";
+import { labelForLevel } from "@/lib/levels";
+import { deleteSkill, useSkills } from "@/lib/storage";
 
 type SkillDetailProps = {
   id: string;
@@ -13,9 +13,9 @@ type SkillDetailProps = {
 export function SkillDetail({ id }: SkillDetailProps) {
   const router = useRouter();
   const skills = useSkills();
-  const [saved, setSaved] = useState(false);
   const [deleted, setDeleted] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -44,29 +44,6 @@ export function SkillDetail({ id }: SkillDetailProps) {
     return <p>Skill not found</p>;
   }
 
-  function handleSave(event: SubmitEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const name = String(data.get("name") ?? "");
-    if (!name.trim()) {
-      event.currentTarget.reportValidity();
-      return;
-    }
-
-    const updated = updateSkill(id, {
-      name,
-      description: String(data.get("description") ?? ""),
-      notes: String(data.get("notes") ?? ""),
-      priority: Number(data.get("priority")) as SkillLevel,
-      knowledge: Number(data.get("knowledge")) as SkillLevel,
-    });
-
-    if (!updated) {
-      return;
-    }
-    setSaved(true);
-  }
-
   function handleCloseConfirm() {
     setConfirmOpen(false);
   }
@@ -82,87 +59,47 @@ export function SkillDetail({ id }: SkillDetailProps) {
 
   return (
     <section className="flex max-w-xl flex-col gap-6">
-      <form onSubmit={handleSave} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          Name
-          <input
-            name="name"
-            required
-            defaultValue={skill.name}
-            key={`${skill.id}-name-${skill.name}`}
-            className="rounded-md border border-black/15 bg-transparent px-3 py-2 text-2xl font-semibold dark:border-white/20"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Description
-          <textarea
-            name="description"
-            rows={2}
-            defaultValue={skill.description}
-            key={`${skill.id}-description-${skill.description}`}
-            className="rounded-md border border-black/15 bg-transparent px-3 py-2 dark:border-white/20"
-          />
-        </label>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <h1 className="text-3xl font-semibold tracking-tight">{skill.name}</h1>
+        <button
+          type="button"
+          onClick={() => setEditOpen(true)}
+          className="rounded-md bg-foreground px-4 py-2 text-sm text-background"
+        >
+          Edit
+        </button>
+      </div>
+
+      <dl className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <dt className="text-sm text-zinc-600 dark:text-zinc-400">
+            Description
+          </dt>
+          <dd className="min-h-6 whitespace-pre-wrap text-base">
+            {skill.description}
+          </dd>
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="flex flex-col gap-1 text-sm">
-            Priority
-            <select
-              name="priority"
-              defaultValue={skill.priority}
-              key={`${skill.id}-priority-${skill.priority}`}
-              className="rounded-md border border-black/15 bg-background px-3 py-2 dark:border-white/20"
-            >
-              {LEVELS.map((level) => (
-                <option key={level} value={level}>
-                  {LEVEL_LABELS[level]}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1 text-sm">
-            Knowledge
-            <select
-              name="knowledge"
-              defaultValue={skill.knowledge}
-              key={`${skill.id}-knowledge-${skill.knowledge}`}
-              className="rounded-md border border-black/15 bg-background px-3 py-2 dark:border-white/20"
-            >
-              {LEVELS.map((level) => (
-                <option key={level} value={level}>
-                  {LEVEL_LABELS[level]}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="flex flex-col gap-1">
+            <dt className="text-sm text-zinc-600 dark:text-zinc-400">
+              Priority
+            </dt>
+            <dd className="text-base">{labelForLevel(skill.priority)}</dd>
+          </div>
+          <div className="flex flex-col gap-1">
+            <dt className="text-sm text-zinc-600 dark:text-zinc-400">
+              Knowledge
+            </dt>
+            <dd className="text-base">{labelForLevel(skill.knowledge)}</dd>
+          </div>
         </div>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Current: {labelForLevel(skill.priority)} priority,{" "}
-          {labelForLevel(skill.knowledge)} knowledge.
-        </p>
-        <label className="flex flex-col gap-1 text-sm">
-          Notes
-          <textarea
-            name="notes"
-            rows={4}
-            defaultValue={skill.notes}
-            key={`${skill.id}-notes-${skill.notes}`}
-            className="rounded-md border border-black/15 bg-transparent px-3 py-2 dark:border-white/20"
-          />
-        </label>
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="submit"
-            className="rounded-md bg-foreground px-4 py-2 text-sm text-background"
-          >
-            Save
-          </button>
-          {saved ? (
-            <span className="text-sm text-zinc-600 dark:text-zinc-400">
-              Saved
-            </span>
-          ) : null}
+        <div className="flex flex-col gap-1">
+          <dt className="text-sm text-zinc-600 dark:text-zinc-400">Notes</dt>
+          <dd className="min-h-6 whitespace-pre-wrap text-base">
+            {skill.notes}
+          </dd>
         </div>
-      </form>
+      </dl>
 
       <div className="flex flex-col items-start gap-2 border-t border-black/10 pt-6 dark:border-white/15">
         <button
@@ -205,6 +142,14 @@ export function SkillDetail({ id }: SkillDetailProps) {
           </button>
         </div>
       </dialog>
+
+      {editOpen ? (
+        <SkillEditForm
+          open
+          skill={skill}
+          onClose={() => setEditOpen(false)}
+        />
+      ) : null}
     </section>
   );
 }

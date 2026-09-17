@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useRef, type SubmitEvent } from "react";
+import { useEffect, useRef, useState, type SubmitEvent } from "react";
 import { LEVELS, LEVEL_LABELS } from "@/lib/levels";
 import { updateSkill } from "@/lib/storage";
 import type { Skill, SkillLevel } from "@/types/skill";
+
+const NAME_ERROR_ID = "edit-skill-name-error";
 
 type SkillEditFormProps = {
   open: boolean;
@@ -13,6 +15,8 @@ type SkillEditFormProps = {
 
 export function SkillEditForm({ open, onClose, skill }: SkillEditFormProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const [nameError, setNameError] = useState(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -27,13 +31,20 @@ export function SkillEditForm({ open, onClose, skill }: SkillEditFormProps) {
     }
   }, [open]);
 
+  useEffect(() => {
+    if (nameError) {
+      nameInputRef.current?.focus();
+    }
+  }, [nameError]);
+
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
     const name = String(data.get("name") ?? "");
     if (!name.trim()) {
-      form.reportValidity();
+      setNameError(true);
+      nameInputRef.current?.focus();
       return;
     }
 
@@ -48,6 +59,11 @@ export function SkillEditForm({ open, onClose, skill }: SkillEditFormProps) {
     if (!updated) {
       return;
     }
+    handleClose();
+  }
+
+  function handleClose() {
+    setNameError(false);
     onClose();
   }
 
@@ -55,23 +71,30 @@ export function SkillEditForm({ open, onClose, skill }: SkillEditFormProps) {
     <dialog
       ref={dialogRef}
       className="w-[min(100%,28rem)] rounded-xl border border-black/10 bg-background p-6 text-foreground shadow-lg dark:border-white/15"
-      onClose={onClose}
+      onClose={handleClose}
       onCancel={(event) => {
         event.preventDefault();
-        onClose();
+        handleClose();
       }}
     >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">Edit Skill</h2>
         <label className="flex flex-col gap-1 text-sm">
           Name
           <input
+            ref={nameInputRef}
             name="name"
-            required
             autoFocus
             defaultValue={skill.name}
+            aria-invalid={nameError || undefined}
+            aria-describedby={nameError ? NAME_ERROR_ID : undefined}
             className="rounded-md border border-black/15 bg-transparent px-3 py-2 dark:border-white/20"
           />
+          {nameError ? (
+            <span id={NAME_ERROR_ID} className="text-sm text-red-700 dark:text-red-400">
+              Name is required
+            </span>
+          ) : null}
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Description
@@ -121,7 +144,7 @@ export function SkillEditForm({ open, onClose, skill }: SkillEditFormProps) {
         <div className="flex justify-end gap-2 pt-2">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="rounded-md border border-black/15 px-4 py-2 text-sm dark:border-white/20"
           >
             Cancel

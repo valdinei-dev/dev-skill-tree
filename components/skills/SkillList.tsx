@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { SkillForm } from "@/components/skills/SkillForm";
 import { labelForLevel } from "@/lib/levels";
 import { useSkills } from "@/lib/storage";
@@ -19,6 +19,23 @@ function sortSkillsForTable(skills: Skill[]): Skill[] {
 export function SkillList() {
   const skills = useSkills();
   const [formOpen, setFormOpen] = useState(false);
+  const openerRef = useRef<HTMLButtonElement | null>(null);
+
+  function openCreate(event: MouseEvent<HTMLButtonElement>) {
+    openerRef.current = event.currentTarget;
+    setFormOpen(true);
+  }
+
+  function handleFormClose() {
+    setFormOpen(false);
+  }
+
+  useEffect(() => {
+    if (formOpen) {
+      return;
+    }
+    openerRef.current?.focus();
+  }, [formOpen]);
 
   if (skills === null) {
     return <p className="text-zinc-600 dark:text-zinc-400">Loading...</p>;
@@ -33,7 +50,7 @@ export function SkillList() {
         {skills.length > 0 ? (
           <button
             type="button"
-            onClick={() => setFormOpen(true)}
+            onClick={openCreate}
             className="rounded-md bg-foreground px-4 py-2 text-sm text-background"
           >
             Create Skill
@@ -48,7 +65,7 @@ export function SkillList() {
           </p>
           <button
             type="button"
-            onClick={() => setFormOpen(true)}
+            onClick={openCreate}
             className="rounded-md bg-foreground px-4 py-2 text-sm text-background"
           >
             Create your first skill
@@ -95,11 +112,13 @@ export function SkillList() {
         </table>
       )}
 
-      <SkillForm
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        onCreated={() => undefined}
-      />
+      {formOpen ? (
+        <SkillForm
+          open
+          onClose={handleFormClose}
+          onCreated={() => undefined}
+        />
+      ) : null}
     </section>
   );
 }

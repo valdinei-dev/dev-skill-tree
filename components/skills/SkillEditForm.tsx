@@ -6,6 +6,7 @@ import { updateSkill } from "@/lib/storage";
 import type { Skill, SkillLevel } from "@/types/skill";
 
 const NAME_ERROR_ID = "edit-skill-name-error";
+const TITLE_ID = "edit-skill-title";
 
 type SkillEditFormProps = {
   open: boolean;
@@ -70,6 +71,7 @@ export function SkillEditForm({ open, onClose, skill }: SkillEditFormProps) {
   return (
     <dialog
       ref={dialogRef}
+      aria-labelledby={TITLE_ID}
       className="w-[min(100%,28rem)] rounded-xl border border-black/10 bg-background p-6 text-foreground shadow-lg dark:border-white/15"
       onClose={handleClose}
       onCancel={(event) => {
@@ -78,7 +80,9 @@ export function SkillEditForm({ open, onClose, skill }: SkillEditFormProps) {
       }}
     >
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Edit Skill</h2>
+        <h2 id={TITLE_ID} className="text-lg font-semibold">
+          Edit Skill
+        </h2>
         <label className="flex flex-col gap-1 text-sm">
           Name
           <input

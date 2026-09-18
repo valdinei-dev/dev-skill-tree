@@ -6,6 +6,7 @@ import { createSkill } from "@/lib/storage";
 import type { SkillLevel } from "@/types/skill";
 
 const NAME_ERROR_ID = "create-skill-name-error";
+const TITLE_ID = "create-skill-title";
 
 type SkillFormProps = {
   open: boolean;
@@ -69,6 +70,7 @@ export function SkillForm({ open, onClose, onCreated }: SkillFormProps) {
   return (
     <dialog
       ref={dialogRef}
+      aria-labelledby={TITLE_ID}
       className="w-[min(100%,28rem)] rounded-xl border border-black/10 bg-background p-6 text-foreground shadow-lg dark:border-white/15"
       onClose={handleClose}
       onCancel={(event) => {
@@ -77,7 +79,9 @@ export function SkillForm({ open, onClose, onCreated }: SkillFormProps) {
       }}
     >
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Create Skill</h2>
+        <h2 id={TITLE_ID} className="text-lg font-semibold">
+          Create Skill
+        </h2>
         <label className="flex flex-col gap-1 text-sm">
           Name
           <input

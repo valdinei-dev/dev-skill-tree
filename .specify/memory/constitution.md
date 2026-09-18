@@ -1,20 +1,21 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 → 2.0.0
+- Version change: 2.0.0 → 3.0.0
 - Modified principles:
-  - I. MVP Scope Discipline → I. MVP Scope Discipline (skill catalog only;
-    job requirements removed from included MVP)
-  - II. Skills Remain Independent → II. Skills Remain Independent (no longer
-    defined in terms of Job associations)
-  - III. Jobs Associate Existing Skills Only → III. Jobs Stay Out Until a
-    Later Spec (incompatible redefinition: Job is out of MVP)
+  - I. MVP Scope Discipline → I. MVP Scope Discipline (catalog is no longer
+    required to be client-only; persistence MAY leave the browser via a
+    ratified spec)
+  - II. Skills Remain Independent → unchanged
+  - III. Jobs Stay Out Until a Later Spec → unchanged
   - IV. User-Owned Priority and Knowledge → unchanged
-  - V. Simplicity Before Abstraction → unchanged (Job overlays/routes dropped
-    from implied surface)
+  - V. Simplicity Before Abstraction → V. Simplicity Before Abstraction
+    (storage module remains required; UI MUST NOT call localStorage, fetch,
+    or JSON serialize; extra persistence layers still forbidden until needed)
 - Added sections: none
 - Removed sections: none
-- Follow-up TODOs: update feature spec 001, data-model, research, contracts,
-  plan, tasks, and remove Job from application code
+- Follow-up TODOs: ratify a specification for server-side skill persistence
+  (HTTP catalog API, no authentication, no database engine). Do not start
+  auth or a SQL/NoSQL engine in that first spec.
 -->
 
 # Dev Skill Tree Constitution
@@ -23,18 +24,19 @@ Sync Impact Report
 
 ### I. MVP Scope Discipline
 
-Dev Skill Tree is a client-side web app that helps developers track,
-organize, and improve technical knowledge through a personal skill catalog.
+Dev Skill Tree is a web app that helps developers track, organize, and
+improve technical knowledge through a personal skill catalog.
 
-Every change MUST map to an Included MVP capability (skills catalog,
-priority, knowledge, notes, navigation, and `localStorage` persistence)
-or to an approved constitution amendment. Features listed under Scope
-Boundaries as out of MVP MUST NOT be implemented until this constitution
-is amended or a post-MVP specification is ratified.
+Every change MUST map to an Included capability (skills catalog, priority,
+knowledge, notes, navigation, and persistence of Skill records) or to an
+approved constitution amendment. Features listed under Scope Boundaries as
+out of scope MUST NOT be implemented until this constitution is amended or
+a later specification is ratified.
 
 Rationale: A small product that can be used immediately is the goal.
-Speculative features delay that outcome. Manual job entry was rejected
-because it would not be used; that does not expand this MVP.
+Speculative features delay that outcome. Persistence may move off the
+browser when a spec ratifies that step; that is not a license to add
+Jobs, auth, or unrelated platforms in the same change.
 
 ### II. Skills Remain Independent
 
@@ -52,7 +54,7 @@ work as a study tool on its own.
 
 ### III. Jobs Stay Out Until a Later Spec
 
-The MVP MUST NOT include a Job entity, a jobs collection, job routes,
+The product MUST NOT include a Job entity, a jobs collection, job routes,
 job creation UI, or skill–job association. Skill deletion MUST NOT be
 blocked by job references.
 
@@ -61,7 +63,7 @@ and job-application tracking MUST NOT be added to justify bringing Jobs
 back. A later ratified specification MAY introduce Jobs. Until then,
 unused Job surface MUST NOT remain in the product.
 
-Rationale: Unused screens teach the wrong habit and hide the real MVP.
+Rationale: Unused screens teach the wrong habit and hide the real catalog.
 Import is a different product, not a reason to keep a dead entity.
 
 ### IV. User-Owned Priority and Knowledge
@@ -73,9 +75,9 @@ integer scale `1`–`5` (`1` Very Low, `2` Low, `3` Medium, `4` High,
 
 The user MUST set both values explicitly. The application MUST NOT
 calculate, infer, recommend, or otherwise automate priority or knowledge
-in the MVP. Internal numeric values MUST stay independent of UI
-representation (labels, stars, or other visuals MAY change; stored
-integers MUST NOT be derived by the app).
+until a later spec says otherwise. Internal numeric values MUST stay
+independent of UI representation (labels, stars, or other visuals MAY
+change; stored integers MUST NOT be derived by the app).
 
 On create, unspecified Skill fields MUST default to `description = ""`,
 `priority = 1`, `knowledge = 1`, and `notes = ""`. Only `name` is
@@ -91,60 +93,79 @@ architectural layers unless they solve a demonstrated problem. Prefer a
 design that can evolve over one that anticipates every future version.
 
 The storage module is a required abstraction: UI components MUST NOT call
-`localStorage`, `JSON.parse`, or `JSON.stringify` directly. Additional
-layers (generic repositories, state machines, analytics pipelines) MUST
-NOT be introduced without a concrete MVP need.
+`localStorage`, `fetch`, `JSON.parse`, or `JSON.stringify` directly.
+Callers MUST use operations such as `getSkills`, `getSkillById`,
+`createSkill`, `updateSkill`, and `deleteSkill`. Additional layers
+(generic repositories, ORMs used from the UI, state machines, analytics
+pipelines) MUST NOT be introduced without a concrete need in a ratified
+spec.
 
 Pages MUST remain Server Components where possible. Components that read
 browser APIs or handle user interaction MUST be Client Components.
 `"use client"` MUST NOT be added without a concrete client-side reason.
 
-Rationale: Future resources, study, career, and analytics features are
-cheaper to add when the MVP stays small and explicit.
+Rationale: Future resources, study, career, analytics, and identity
+features are cheaper when the catalog stays small and the UI stays
+behind one persistence contract.
 
 ## Technical Constraints
 
-The MVP MUST run without a backend, database, authentication, user
-accounts, or external APIs. Persistence MUST use browser `localStorage`
-with one collection: `skills` (complete Skill objects). The MVP MUST NOT
-read or write a `jobs` collection.
+Persistence MUST go through the storage module. The implementation behind
+that module MAY be browser `localStorage` or a server that the module
+calls. A ratified specification MUST choose and document the move; until
+then, `localStorage` with one collection `skills` (complete Skill objects)
+remains the implementation.
 
-Persistence logic MUST live in a dedicated storage module (conceptually
-`lib/storage.ts`) that exposes operations such as `getSkills`,
-`getSkillById`, `createSkill`, `updateSkill`, and `deleteSkill`.
+A later specification MAY introduce an HTTP catalog API for Skill
+operations only. That first server slice MUST NOT add authentication,
+user accounts, or a database engine (SQL or NoSQL). How that server
+holds data (process memory, a file, or equivalent) is for that spec to
+decide. A dedicated database engine MUST wait for its own ratified spec
+after the catalog is already served over HTTP. Authentication and
+per-user catalogs MUST wait for a later spec after durable storage exists.
+
+The product MUST NOT read or write a `jobs` collection. The product MUST
+NOT call third-party HTTP APIs. An HTTP API owned by this app for skills
+is not a third-party API.
+
 `getSkillById` MAY be implemented by reading `getSkills` and finding by
-`id`. Callers MUST NOT need to know serialization details. `deleteSkill`
-MUST remove the skill when it exists; it MUST NOT consult other entities.
+`id`. Callers MUST NOT need to know serialization or transport details.
+`deleteSkill` MUST remove the skill when it exists; it MUST NOT consult
+other entities.
 
-Skill Detail MUST load Skill data on the client because the source is
-`localStorage`. The route MAY remain a Server Component; the component
-that reads storage MUST be a Client Component. Missing skills MUST
-surface a not-found state; loading MUST surface an explicit loading
-state.
+Skill Detail MUST load Skill data through the storage module. The route
+MAY remain a Server Component; the component that reads the catalog MUST
+be a Client Component while the catalog is read in the browser. Missing
+skills MUST surface a not-found state; loading MUST surface an explicit
+loading state. If persistence is remote, failure to reach the server MUST
+surface an explicit error state rather than a silent empty catalog.
 
-The stack is Next.js App Router with React. Suggested routes for the MVP
-are `/`, `/skills`, `/skills/[id]`, and `/about`. A global header MUST
-provide Logo, Home, My Skills, and About. Logo MUST sit on the start
-edge; the remaining items MUST sit on the end edge. Skill creation MUST
-use a modal or drawer rather than a permanently visible form. This
-layout is the intended starting structure, not a mandate to add extra
-directories or frameworks.
+The stack is Next.js App Router with React. Suggested routes remain `/`,
+`/skills`, `/skills/[id]`, and `/about`. A global header MUST provide
+Logo, Home, My Skills, and About. Logo MUST sit on the start edge; the
+remaining items MUST sit on the end edge. Skill creation MUST use a modal
+or drawer rather than a permanently visible form. This layout is the
+intended starting structure, not a mandate to add extra directories or
+frameworks.
 
 ## Scope Boundaries
 
-Included in the MVP:
+Included:
 
 - Create, list, view, update, and delete skills; sort or group by
   priority (higher first)
 - Store skill `name`, `description`, `priority`, `knowledge`, and `notes`
 - Navigate from the skill list to Skill Detail
-- Persist skills across browser sessions via `localStorage`
+- Persist skills (today: `localStorage`; later: a ratified server spec
+  MAY replace that implementation)
 
-Explicitly out of MVP (MUST NOT ship until a later ratified spec):
+Explicitly out of scope until a later ratified spec (MUST NOT ship now):
 
 - Job entity, job routes, job–skill association, job import, and
   automatic skill extraction from postings
-- Authentication, accounts, backend, database, external APIs
+- Authentication, user accounts, sessions, and per-user catalogs
+- A database engine (Postgres, SQLite, or similar)
+- Third-party external APIs
 - Job metadata: company, salary, URL, description, application status,
   application dates
 - Automatic skill prioritization, frequency analytics, charts, dashboards
@@ -154,9 +175,10 @@ Explicitly out of MVP (MUST NOT ship until a later ratified spec):
 - Skill categories; a status field separate from knowledge level
 
 Planned later versions (Resources, Study, Career Opportunities, Knowledge
-Analytics, Advanced Features) MUST NOT shape MVP data models or UI beyond
+Analytics, Advanced Features) MUST NOT shape data models or UI beyond
 keeping Skill as the source of truth. A future Job feature MUST be a
-separate specification.
+separate specification. Identity and a database engine MUST each be a
+separate specification after server-side catalog persistence exists.
 
 ## Governance
 
@@ -175,12 +197,14 @@ comment describing principle and section changes. Versioning:
 
 Compliance review: every specification, plan, and pull request MUST
 verify that proposed work stays inside Scope Boundaries, preserves Skill
-independence, keeps Jobs out of this MVP, keeps priority and knowledge
-user-controlled, and routes persistence through the storage module.
-Unjustified complexity MUST be rejected.
+independence, keeps Jobs out, keeps priority and knowledge user-controlled,
+routes persistence through the storage module, and does not introduce
+auth or a database engine until those specs exist. Unjustified complexity
+MUST be rejected.
 
 Runtime development guidance for this Next.js version lives in
 `AGENTS.md`. Feature work MUST proceed through Spec Kit (`specify` →
-`plan` → `tasks` → `implement`) rather than expanding the MVP informally.
+`plan` → `tasks` → `implement`) rather than expanding the product
+informally.
 
-**Version**: 2.0.0 | **Ratified**: 2026-09-10 | **Last Amended**: 2026-09-16
+**Version**: 3.0.0 | **Ratified**: 2026-09-10 | **Last Amended**: 2026-09-18
